@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Controle de Projetos</title>
+</head>
+<body>
+  <h1>Lista de Projetos</h1>
+  <ul id="lista-projetos"></ul>
+
+  <h2>Adicionar Novo Projeto</h2>
+  <form id="form-projeto">
+    <label for="nome">Nome:</label><br>
+    <input type="text" id="nome" name="nome" required /><br><br>
+    
+    <label for="dataInicio">Data de Início:</label><br>
+    <input type="date" id="dataInicio" name="dataInicio" required /><br><br>
+    
+    <label for="dataFim">Data de Fim:</label><br>
+    <input type="date" id="dataFim" name="dataFim" required /><br><br>
+    
+    <button type="submit">Salvar Projeto</button>
+  </form>
+
+  <script>
+    const listaProjetos = document.getElementById("lista-projetos");
+    const formProjeto = document.getElementById("form-projeto");
+
+    // Função para carregar e exibir os projetos
+    async function carregarProjetos() {
+      listaProjetos.innerHTML = '';
+      const resposta = await fetch("http://localhost:8080/projetos");
+      const projetos = await resposta.json();
+      projetos.forEach(p => {
+        const item = document.createElement("li");
+        item.textContent = `${p.nome} - Início: ${p.dataInicio} / Fim: ${p.dataFim}`;
+        listaProjetos.appendChild(item);
+      });
+    }
+
+    // Função para enviar um novo projeto
+    formProjeto.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const projeto = {
+        nome: document.getElementById("nome").value,
+        dataInicio: document.getElementById("dataInicio").value,
+        dataFim: document.getElementById("dataFim").value
+      };
+
+      const resposta = await fetch("http://localhost:8080/projetos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(projeto)
+      });
+
+      if (resposta.ok) {
+        formProjeto.reset();
+        carregarProjetos();
+        alert("Projeto salvo com sucesso!");
+      } else {
+        alert("Erro ao salvar projeto!");
+      }
+    });
+
+    // Carregar ao iniciar
+    carregarProjetos();
+  </script>
+</body>
+</html>
